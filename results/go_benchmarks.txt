@@ -1,0 +1,19 @@
+# go test -run XXX -bench . -benchmem ./...   (linux amd64, 2 CPUs, go1.27.3)
+ok  	github.com/CHbobray/go-image-pipeline	0.003s
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+BenchmarkGrayscale-2   	      73	  15763879 ns/op	 3753765 B/op	  750002 allocs/op
+BenchmarkResize-2      	      97	  12080549 ns/op	 2290853 B/op	      20 allocs/op
+ok  	github.com/CHbobray/go-image-pipeline/imageprocessing	2.354s
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+BenchmarkRepoImages/sequential-2         	       7	 155294931 ns/op	        25.76 images/s	31252259 B/op	  802204 allocs/op
+BenchmarkRepoImages/pipeline-2           	       9	 112220819 ns/op	        35.64 images/s	31251798 B/op	  802222 allocs/op
+BenchmarkRepoImages/parallel-2           	      10	 109548107 ns/op	        36.51 images/s	31252190 B/op	  802227 allocs/op
+BenchmarkSyntheticBatch/sequential-2     	       1	1094122014 ns/op	        21.94 images/s	220711144 B/op	 4594726 allocs/op
+BenchmarkSyntheticBatch/pipeline-2       	       2	 782420804 ns/op	        30.67 images/s	220711912 B/op	 4594745 allocs/op
+BenchmarkSyntheticBatch/parallel-2       	       2	 706073992 ns/op	        33.99 images/s	220712944 B/op	 4594751 allocs/op
+ok  	github.com/CHbobray/go-image-pipeline/pipeline	8.629s
+ok  	github.com/CHbobray/go-image-pipeline/timing	0.003s

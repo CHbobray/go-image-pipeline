@@ -1,0 +1,22 @@
+# CPU profile of: imagepipeline -runs 20 -warmup 2 -cpuprofile cpu.prof   (go tool pprof -top)
+Time: 2026-10-26 20:14:39 CDT
+Duration: 9.07s, Total samples = 13670ms (150.78%)
+Showing nodes accounting for 10220ms, 74.76% of 13670ms total
+Dropped 218 nodes (cum <= 68.35ms)
+Showing top 15 nodes out of 107
+      flat  flat%   sum%        cum   cum%
+    4940ms 36.14% 36.14%     5370ms 39.28%  github.com/nfnt/resize.resizeYCbCr
+     940ms  6.88% 43.01%     1600ms 11.70%  image/jpeg.(*decoder).reconstructBlock
+     740ms  5.41% 48.43%      810ms  5.93%  github.com/nfnt/resize.resizeRGBA
+     470ms  3.44% 51.87%      470ms  3.44%  github.com/nfnt/resize.clampUint8 (inline)
+     460ms  3.37% 55.23%      800ms  5.85%  image/jpeg.(*decoder).decodeHuffman
+     400ms  2.93% 58.16%     3220ms 23.56%  image/jpeg.(*decoder).processSOS
+     340ms  2.49% 60.64%      350ms  2.56%  image/jpeg.(*decoder).receiveExtend
+     320ms  2.34% 62.98%      320ms  2.34%  github.com/nfnt/resize.convertToYCC420
+     300ms  2.19% 65.18%      390ms  2.85%  image/jpeg.idctCols
+     280ms  2.05% 67.23%      380ms  2.78%  image/color.grayModel
+     260ms  1.90% 69.13%      550ms  4.02%  image/jpeg.(*encoder).writeBlock
+     220ms  1.61% 70.74%      220ms  1.61%  runtime.memclrNoHeapPointers
+     200ms  1.46% 72.20%      350ms  2.56%  image/jpeg.(*decoder).ensureNBits
+     180ms  1.32% 73.52%      180ms  1.32%  image/jpeg.dctBox (inline)
+     170ms  1.24% 74.76%      170ms  1.24%  image/jpeg.div (inline)

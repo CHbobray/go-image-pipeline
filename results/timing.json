@@ -1,0 +1,60 @@
+{
+  "platform": "linux amd64",
+  "go": "go1.27.3",
+  "cpus": 2,
+  "images": 4,
+  "size": 500,
+  "keep_aspect": true,
+  "workers": 2,
+  "warmup_runs": 2,
+  "modes": [
+    {
+      "mode": "sequential",
+      "timing": {
+        "runs": 20,
+        "mean_ms": 162.44853,
+        "std_ms": 13.455782270637577,
+        "min_ms": 138.963904,
+        "median_ms": 163.760383,
+        "p95_ms": 185.709324,
+        "max_ms": 185.709324
+      },
+      "images_per_second": 24.62318372471576,
+      "speedup_vs_sequential": 1,
+      "alloc_mb_per_run": 29.802356719970703,
+      "allocs_per_run": 802201.25
+    },
+    {
+      "mode": "pipeline",
+      "timing": {
+        "runs": 20,
+        "mean_ms": 116.445608,
+        "std_ms": 10.656510992992125,
+        "min_ms": 92.058666,
+        "median_ms": 116.0200465,
+        "p95_ms": 138.623022,
+        "max_ms": 138.623022
+      },
+      "images_per_second": 34.35080179236988,
+      "speedup_vs_sequential": 1.395059313872963,
+      "alloc_mb_per_run": 29.803678131103517,
+      "allocs_per_run": 802221.25
+    },
+    {
+      "mode": "parallel",
+      "timing": {
+        "runs": 20,
+        "mean_ms": 111.96767194999998,
+        "std_ms": 9.911483790914735,
+        "min_ms": 96.972753,
+        "median_ms": 115.073912,
+        "p95_ms": 128.047784,
+        "max_ms": 128.047784
+      },
+      "images_per_second": 35.72459738009227,
+      "speedup_vs_sequential": 1.4508520823094602,
+      "alloc_mb_per_run": 29.80380859375,
+      "allocs_per_run": 802225.8
+    }
+  ]
+}

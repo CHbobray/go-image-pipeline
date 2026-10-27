@@ -1,0 +1,41 @@
+imagepipeline run started 2026-10-26T20:14:39-05:00
+command: ["/tmp/claude-0/ip" "-runs" "20" "-warmup" "2" "-cpuprofile" "/tmp/claude-0/ipcpu.prof"]
+
+Found 4 images in images
+Output: grayscale, 500 pixels on the longer side, keeping each image's shape
+Modes: sequential, pipeline, parallel (parallel uses 2 workers per stage; this computer has 2 CPUs)
+
+Images processed:
+  ok      coffee.png               ->  500 x 333  images/output/coffee.png
+  ok      hubble_deep_field.jpg    ->  500 x 436  images/output/hubble_deep_field.jpg
+  ok      retina.jpg               ->  500 x 500  images/output/retina.jpg
+  ok      spacex_rocket.jpg        ->  500 x 334  images/output/spacex_rocket.jpg
+All 3 modes wrote identical output files.
+
+Time per stage in one sequential pass:
+
+| Stage | Time for all images (ms) | Share |
+|---|---:|---:|
+| Load (decode) | 58.2 | 31% |
+| Resize | 92.5 | 49% |
+| Grayscale | 19.0 | 10% |
+| Save (encode) | 20.3 | 11% |
+
+Benchmarking: 2 warm-up + 20 timed rounds; each round runs every mode once, in shuffled order.
+  round 5/22 done (timed)
+  round 10/22 done (timed)
+  round 15/22 done (timed)
+  round 20/22 done (timed)
+  round 22/22 done (timed)
+
+Time to process all 4 images (linux amd64, 2 CPUs):
+
+| Mode | Mean (ms) | Std (ms) | Median (ms) | p95 (ms) | Images/s | Speedup vs sequential | Allocated per run (MB) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| sequential | 162.4 | 13.5 | 163.8 | 185.7 | 24.6 | 1.00x | 29.8 |
+| pipeline | 116.4 | 10.7 | 116.0 | 138.6 | 34.4 | 1.40x | 29.8 |
+| parallel | 112.0 | 9.9 | 115.1 | 128.0 | 35.7 | 1.45x | 29.8 |
+
+Processed images are in images/output; timing and run log are in results
+
+run finished successfully after 9.07s
