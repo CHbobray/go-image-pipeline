@@ -1,19 +1,24 @@
-# go test -run XXX -bench . -benchmem ./...   (linux amd64, 2 CPUs, go1.27.3)
-ok  	github.com/CHbobray/go-image-pipeline	0.003s
-goos: linux
+﻿PASS
+ok  	github.com/CHbobray/go-image-pipeline	0.572s
+goos: windows
 goarch: amd64
-cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
-BenchmarkGrayscale-2   	      73	  15763879 ns/op	 3753765 B/op	  750002 allocs/op
-BenchmarkResize-2      	      97	  12080549 ns/op	 2290853 B/op	      20 allocs/op
-ok  	github.com/CHbobray/go-image-pipeline/imageprocessing	2.354s
-goos: linux
+pkg: github.com/CHbobray/go-image-pipeline/imageprocessing
+cpu: 13th Gen Intel(R) Core(TM) i7-1355U
+BenchmarkGrayscale-12    	     100	  11104016 ns/op	 3753861 B/op	  750002 allocs/op
+BenchmarkResize-12       	     297	   3936869 ns/op	 2294065 B/op	      61 allocs/op
+PASS
+ok  	github.com/CHbobray/go-image-pipeline/imageprocessing	2.824s
+goos: windows
 goarch: amd64
-cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
-BenchmarkRepoImages/sequential-2         	       7	 155294931 ns/op	        25.76 images/s	31252259 B/op	  802204 allocs/op
-BenchmarkRepoImages/pipeline-2           	       9	 112220819 ns/op	        35.64 images/s	31251798 B/op	  802222 allocs/op
-BenchmarkRepoImages/parallel-2           	      10	 109548107 ns/op	        36.51 images/s	31252190 B/op	  802227 allocs/op
-BenchmarkSyntheticBatch/sequential-2     	       1	1094122014 ns/op	        21.94 images/s	220711144 B/op	 4594726 allocs/op
-BenchmarkSyntheticBatch/pipeline-2       	       2	 782420804 ns/op	        30.67 images/s	220711912 B/op	 4594745 allocs/op
-BenchmarkSyntheticBatch/parallel-2       	       2	 706073992 ns/op	        33.99 images/s	220712944 B/op	 4594751 allocs/op
-ok  	github.com/CHbobray/go-image-pipeline/pipeline	8.629s
-ok  	github.com/CHbobray/go-image-pipeline/timing	0.003s
+pkg: github.com/CHbobray/go-image-pipeline/pipeline
+cpu: 13th Gen Intel(R) Core(TM) i7-1355U
+BenchmarkRepoImages/sequential-12         	      10	 101768340 ns/op	        39.30 images/s	31290824 B/op	  802412 allocs/op
+BenchmarkRepoImages/pipeline-12           	      19	  61301011 ns/op	        65.25 images/s	31273046 B/op	  802403 allocs/op
+BenchmarkRepoImages/parallel-12           	      28	  43772000 ns/op	        91.38 images/s	31274450 B/op	  802459 allocs/op
+BenchmarkSyntheticBatch/sequential-12     	       2	 511917900 ns/op	        46.88 images/s	220829052 B/op	 4595767 allocs/op
+BenchmarkSyntheticBatch/pipeline-12       	       4	 308102575 ns/op	        77.90 images/s	220821038 B/op	 4595783 allocs/op
+BenchmarkSyntheticBatch/parallel-12       	       6	 192718717 ns/op	       124.5 images/s	220799940 B/op	 4595790 allocs/op
+PASS
+ok  	github.com/CHbobray/go-image-pipeline/pipeline	8.161s
+PASS
+ok  	github.com/CHbobray/go-image-pipeline/timing	0.467s

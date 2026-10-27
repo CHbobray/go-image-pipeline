@@ -1,66 +1,66 @@
 {
-  "platform": "linux amd64",
-  "go": "go1.27.3",
-  "cpus": 2,
+  "platform": "windows amd64",
+  "go": "go1.27.1-X:simd",
+  "cpus": 12,
   "images": 4,
   "size": 500,
   "keep_aspect": true,
-  "workers": 2,
+  "workers": 12,
   "warmup_runs": 2,
   "modes": [
     {
       "mode": "sequential",
       "timing": {
         "runs": 20,
-        "mean_ms": 158.31508445000003,
-        "std_ms": 15.473216725598869,
-        "min_ms": 140.801667,
-        "median_ms": 155.684278,
-        "p95_ms": 202.910245,
-        "max_ms": 202.910245
+        "mean_ms": 137.96820499999998,
+        "std_ms": 42.64286288456814,
+        "min_ms": 96.7171,
+        "median_ms": 126.6101,
+        "p95_ms": 278.1175,
+        "max_ms": 278.1175
       },
-      "images_per_second": 25.26606996355614,
+      "images_per_second": 28.99218700424493,
       "speedup_vs_sequential": 1,
-      "alloc_mb_per_run": 29.80241470336914,
-      "allocs_per_run": 802201.35
+      "alloc_mb_per_run": 29.819705963134766,
+      "allocs_per_run": 802372.9
     },
     {
       "mode": "pipeline",
       "timing": {
         "runs": 20,
-        "mean_ms": 117.1841158,
-        "std_ms": 18.213892335443948,
-        "min_ms": 98.357436,
-        "median_ms": 111.7777475,
-        "p95_ms": 164.510242,
-        "max_ms": 164.510242
+        "mean_ms": 91.93945999999998,
+        "std_ms": 12.421386005866529,
+        "min_ms": 70.8863,
+        "median_ms": 93.78569999999999,
+        "p95_ms": 108.3271,
+        "max_ms": 108.3271
       },
-      "images_per_second": 34.13431908149449,
-      "speedup_vs_sequential": 1.350994402007512,
-      "alloc_mb_per_run": 29.803600311279297,
-      "allocs_per_run": 802221.25
+      "images_per_second": 43.50689029498325,
+      "speedup_vs_sequential": 1.5006418897826896,
+      "alloc_mb_per_run": 29.821792984008788,
+      "allocs_per_run": 802396.2
     },
     {
       "mode": "parallel",
       "timing": {
         "runs": 20,
-        "mean_ms": 104.78481265,
-        "std_ms": 11.457125251736464,
-        "min_ms": 86.043724,
-        "median_ms": 103.4863555,
-        "p95_ms": 134.602594,
-        "max_ms": 134.602594
+        "mean_ms": 56.36165000000001,
+        "std_ms": 6.93838251775092,
+        "min_ms": 45.0579,
+        "median_ms": 58.001549999999995,
+        "p95_ms": 66.1418,
+        "max_ms": 66.1418
       },
-      "images_per_second": 38.173470933814755,
-      "speedup_vs_sequential": 1.5108590686591261,
-      "alloc_mb_per_run": 29.804429626464845,
-      "allocs_per_run": 802226.55
+      "images_per_second": 70.9702430642112,
+      "speedup_vs_sequential": 2.4479092609957296,
+      "alloc_mb_per_run": 29.829147720336913,
+      "allocs_per_run": 802471.7
     }
   ],
   "program_memory": {
-    "sys_mb": 48.34986114501953,
-    "heap_in_use_mb": 19.1796875,
-    "total_alloc_mb": 2057.295310974121,
-    "num_gc": 249
+    "sys_mb": 58.61156463623047,
+    "heap_in_use_mb": 18.3671875,
+    "total_alloc_mb": 2059.0827560424805,
+    "num_gc": 248
   }
 }
