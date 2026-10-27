@@ -220,7 +220,7 @@ go test -run XXX -bench . -benchmem ./...
 | `BenchmarkRepoImages/{sequential,pipeline,parallel}` | the four images in `images\`, in each mode |
 | `BenchmarkSyntheticBatch/{sequential,pipeline,parallel}` | 24 generated 1200-pixel images, in each mode |
 
-Each reports time per batch, bytes and allocations per batch, and images per second. Output from the development machine is in `results/go_benchmarks.txt`.
+Each reports time per batch, bytes and allocations per batch, and images per second. Output from the Windows laptop is in results/go_benchmarks.txt.`
 
 **Profiles:**
 
@@ -234,7 +234,7 @@ go tool pprof -http=:8080 bin\imagepipeline.exe cpu.prof    # interactive view i
 
 ## Results
 
-Measured on the development machine: **Linux x86-64, 2 CPU cores**, Go 1.27.3. Parallel mode used 2 workers per stage (one per core). Run the program on your own computer to get your numbers; with more cores, use the default `-workers` (one per CPU).
+Measured on the development machine: **Linux x86-64, 2 CPU cores**, Go 1.27.3. Parallel mode used 2 workers per stage (one per core). Run the program on your own computer to get your numbers; with more cores, use the default `-workers` (one per CPU). See also the rerun on a Windows laptop below.
 
 ### Monte Carlo benchmark: the four sample images (20 timed rounds)
 
@@ -279,6 +279,34 @@ The CPU profile agrees: most time is in `nfnt/resize`'s resampling and in the st
 - **A finding for future optimization.** The memory benchmarks show `Grayscale` making one allocation per pixel (750,002 for a 1000 × 750 image), because the original code reads every pixel through the generic `img.At` interface. Reading the pixel buffer directly would remove that cost. It was left unchanged so that all three modes run the original algorithm and the comparison isolates the effect of concurrency.
 
 ---
+### Rerun on a Windows laptop
+
+The same comparison was rerun on my laptop, which has many more cores than the 2-core development machine:
+
+| | |
+|---|---|
+| CPU | 13th Gen Intel Core i7-1355U: 10 cores (2 performance + 8 efficiency), 12 threads |
+| Memory | 16 GB LPDDR5-5200 |
+| Software | Windows, Go 1.27.1 |
+| Settings | 4 images, 20 timed rounds after 2 warm-ups; parallel mode used 12 workers per stage |
+
+| Mode | Mean (ms) | Std (ms) | Median (ms) | p95 (ms) | Images/s | Speedup vs sequential | Allocated per run (MB) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| sequential | 138.0 | 42.6 | 126.6 | 278.1 | 29.0 | 1.00x | 29.8 |
+| pipeline | 91.9 | 12.4 | 93.8 | 108.3 | 43.5 | **1.50x** | 29.8 |
+| parallel | 56.4 | 6.9 | 58.0 | 66.1 | 71.0 | **2.45x** | 29.8 |
+
+Time per stage in one sequential pass: load 49.0 ms (40%), resize 36.8 ms (30%), grayscale 18.9 ms (15%), save 19.2 ms (16%).
+
+**What changed with more cores:**
+
+- **Parallel mode gained the most: 2.45x, up from 1.51x on 2 cores.** With 12 threads, several images go through the slow stages at the same time. This confirms that the parallel design scales with the hardware.
+- **Pipeline mode barely changed (1.50x vs 1.35x).** One goroutine per stage can use at most four cores at once, and the slowest stage still sets the pace, so extra cores don't help it.
+- **The batch size now limits the speedup.** With only 4 images, at most 4 can be in a stage at the same time, and the batch can't finish faster than its slowest single image (`retina.jpg`, the largest). A bigger batch would let parallel mode use more of the 12 threads.
+- **Concurrency also made timings steadier.** Sequential run times varied widely (p95 of 278 ms against a median of 127 ms), likely the laptop shifting clock speeds and moving work between its fast and slow cores. Parallel mode varied far less (p95 66 ms).
+- **Memory is unchanged:** every mode allocated 29.8 MB per batch on both machines.
+
+`results/` now holds this Windows run (`timing_comparison.md`, `timing.json`, `run_log.txt`, `go_benchmarks.txt`). `cpu_profile_summary.txt` is still from the Linux machine, and the Linux files behind the tables above remain in the Git history.
 
 ## Preserving the aspect ratio (optional item)
 
