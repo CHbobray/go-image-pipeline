@@ -10,7 +10,7 @@ This repository replicates and extends Amrit Singh's (CODEHEIM) Go image-process
 | `pipeline` | one goroutine per stage, connected by channels (the original program's design); stages overlap | 1 per stage |
 | `parallel` | the same pipeline with several worker goroutines per stage (fan-out), so several images can be in one stage at once | `-workers` per stage (default: one per CPU) |
 
-**Short answer:** yes. On the four sample images, the goroutine versions were **1.40x (pipeline)** and **1.45x (parallel)** faster than sequential on a 2-core machine. All three modes wrote byte-identical files and allocated the same memory. A larger generated batch showed a similar gain (up to 1.55x). More CPU cores should raise the parallel mode's advantage; see [Results](#results).
+**Short answer:** yes. On the four sample images, the goroutine versions were **1.35x (pipeline)** and **1.51x (parallel)** faster than sequential on a 2-core machine. All three modes wrote byte-identical files and allocated the same memory. A larger generated batch showed a similar gain (up to 1.55x). More CPU cores should raise the parallel mode's advantage; see [Results](#results).
 
 ---
 
@@ -55,7 +55,7 @@ This repository replicates and extends Amrit Singh's (CODEHEIM) Go image-process
 │   └── output/              processed images (created by the program; not committed)
 ├── results/                 output of the runs reported below
 │   ├── timing_comparison.md     mode comparison and per-stage times
-│   ├── timing.json              the same, with every statistic, as JSON
+│   ├── timing.json              the same, with every statistic and whole-program memory, as JSON
 │   ├── run_log.txt              log written by the program: start time, command, all output, outcome
 │   ├── go_benchmarks.txt        output of go test -bench -benchmem
 │   └── cpu_profile_summary.txt  CPU profile of a full run
@@ -168,7 +168,7 @@ Examples:
 2. Runs each selected mode once, lists every image's result and output size, and confirms that all modes wrote **byte-identical** files.
 3. Shows how long each stage took in the sequential pass.
 4. Runs the Monte Carlo benchmark: `-warmup` untimed rounds, then `-runs` timed rounds. Each round runs every mode once in a freshly shuffled order, so slow drift such as a laptop heating up affects all modes alike.
-5. Prints and saves the timing table (`results\timing_comparison.md`, `results\timing.json`). Everything shown on screen is also written to `results\run_log.txt`, with the start time, the exact command, and whether the run finished or why it failed.
+5. Reports the whole program's memory use from the Go runtime, then prints and saves the timing table (`results\timing_comparison.md`, `results\timing.json`). Everything shown on screen is also written to `results\run_log.txt`, with the start time, the exact command, and whether the run finished or why it failed.
 
 **Input checking.** All problems are reported together, before any work starts:
 
@@ -240,20 +240,22 @@ Measured on the development machine: **Linux x86-64, 2 CPU cores**, Go 1.27.3. P
 
 | Mode | Mean (ms) | Std (ms) | Median (ms) | p95 (ms) | Images/s | Speedup vs sequential | Allocated per run (MB) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| sequential | 162.4 | 13.5 | 163.8 | 185.7 | 24.6 | 1.00x | 29.8 |
-| pipeline | 116.4 | 10.7 | 116.0 | 138.6 | 34.4 | **1.40x** | 29.8 |
-| parallel | 112.0 | 9.9 | 115.1 | 128.0 | 35.7 | **1.45x** | 29.8 |
+| sequential | 158.3 | 15.5 | 155.7 | 202.9 | 25.3 | 1.00x | 29.8 |
+| pipeline | 117.2 | 18.2 | 111.8 | 164.5 | 34.1 | **1.35x** | 29.8 |
+| parallel | 104.8 | 11.5 | 103.5 | 134.6 | 38.2 | **1.51x** | 29.8 |
 
 All three modes wrote byte-identical output files.
+
+**Whole-program memory** (Go runtime, after all 66 batch runs): 48.3 MB obtained from the operating system, 19.2 MB of live heap at the end, 2,057 MB allocated in total over the run, and 249 garbage collections. The program's footprint stays small because each batch's images become garbage as soon as they are saved.
 
 ### Where the time goes (one sequential pass)
 
 | Stage | Time for all images (ms) | Share |
 |---|---:|---:|
-| Load (decode) | 58.2 | 31% |
-| Resize | 92.5 | 49% |
-| Grayscale | 19.0 | 10% |
-| Save (encode) | 20.3 | 11% |
+| Load (decode) | 77.4 | 33% |
+| Resize | 98.3 | 42% |
+| Grayscale | 31.9 | 14% |
+| Save (encode) | 24.3 | 10% |
 
 The CPU profile agrees: most time is in `nfnt/resize`'s resampling and in the standard library's JPEG decoder.
 
@@ -270,9 +272,9 @@ The CPU profile agrees: most time is in `nfnt/resize`'s resampling and in the st
 
 ### What the results mean
 
-- **Goroutines cut the time by about 30%** (a 1.4–1.55x speedup), with no change in output and essentially no extra memory: the concurrent modes add only about 20 allocations per batch, for the goroutines and channels themselves.
-- **Why the pipeline helps even with one goroutine per stage.** Stages overlap: while one image is being resized, the previous one can be converted to grayscale and the next one decoded. But a pipeline is only as fast as its slowest stage, here resizing at about half the work, so its gain levels off.
-- **Why parallel helps more, and more on bigger batches.** Fan-out runs the slow stage on several images at once. On 2 cores the extra gain over the pipeline is small, because the pipeline already keeps both cores fairly busy. The gap widens with more images (1.55x vs 1.40x on the 24-image batch) and should widen further on a machine with more cores.
+- **Goroutines cut the time by about 25–35%** (a 1.35–1.55x speedup), with no change in output and essentially no extra memory: the concurrent modes add only about 20 allocations per batch, for the goroutines and channels themselves.
+- **Why the pipeline helps even with one goroutine per stage.** Stages overlap: while one image is being resized, the previous one can be converted to grayscale and the next one decoded. But a pipeline is only as fast as its slowest stage, here resizing at over 40% of the work, so its gain levels off.
+- **Why parallel helps more, and more on bigger batches.** Fan-out runs the slow stage on several images at once. On 2 cores the extra gain over the pipeline is small, because the pipeline already keeps both cores fairly busy. The gap is clearer with more images (1.55x vs 1.40x on the 24-image batch) and should widen further on a machine with more cores.
 - **The limit is the hardware, not the code.** Concurrency can only use cores that exist. On 2 cores the ideal speedup is 2x, and Go reached about 1.5x after coordination costs and the parts that cannot overlap. That matches what management would see on a small server; larger servers should see more.
 - **A finding for future optimization.** The memory benchmarks show `Grayscale` making one allocation per pixel (750,002 for a 1000 × 750 image), because the original code reads every pixel through the generic `img.At` interface. Reading the pixel buffer directly would remove that cost. It was left unchanged so that all three modes run the original algorithm and the comparison isolates the effect of concurrency.
 
@@ -314,6 +316,7 @@ This project was built with help from **Claude** (Anthropic), used through the C
 - **Planning and setup.** I gave Claude the assignment text. It located and cloned the CODEHEIM repository, built and ran the original unchanged, and kept the original Git history so my changes show as separate commits on top.
 - **Choosing images.** I asked Claude to pick the four images. It chose public-domain and CC0 photos with different sizes, shapes, and formats and recorded their sources in `docs/IMAGE_CREDITS.md`. Running the original program on them exposed its PNG crash.
 - **Writing code.** Claude wrote the error handling, the `pipeline` package with the three modes, the aspect-ratio resizing, the command-line program with input validation and logging, the unit tests, the benchmark methods, `build.ps1`, and this README. It committed each step separately with a description.
+- **Checking against the rubric.** I gave Claude the grading guidelines. It found one over-long function (`run`, split into one function per step) and that whole-program memory was not reported (now added), and fixed both.
 - **Testing and measuring.** Claude ran the tests (including the race detector), the Go benchmarks, the Monte Carlo comparison, and a CPU profile on its 2-core Linux workspace, and cross-compiled the Windows `.exe`. The results above come from those runs.
 - **Mistakes caught along the way.** Claude's first per-stage timing code used `defer` in a way that lost the measurement (the job was copied before the deferred update ran). It noticed when the stage table came out empty and fixed it. One test assumed the JPEG encoder would reject an empty image; it doesn't, so the test was changed to use a too-wide image instead.
 

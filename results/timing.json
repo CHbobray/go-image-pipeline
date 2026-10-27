@@ -12,49 +12,55 @@
       "mode": "sequential",
       "timing": {
         "runs": 20,
-        "mean_ms": 162.44853,
-        "std_ms": 13.455782270637577,
-        "min_ms": 138.963904,
-        "median_ms": 163.760383,
-        "p95_ms": 185.709324,
-        "max_ms": 185.709324
+        "mean_ms": 158.31508445000003,
+        "std_ms": 15.473216725598869,
+        "min_ms": 140.801667,
+        "median_ms": 155.684278,
+        "p95_ms": 202.910245,
+        "max_ms": 202.910245
       },
-      "images_per_second": 24.62318372471576,
+      "images_per_second": 25.26606996355614,
       "speedup_vs_sequential": 1,
-      "alloc_mb_per_run": 29.802356719970703,
-      "allocs_per_run": 802201.25
+      "alloc_mb_per_run": 29.80241470336914,
+      "allocs_per_run": 802201.35
     },
     {
       "mode": "pipeline",
       "timing": {
         "runs": 20,
-        "mean_ms": 116.445608,
-        "std_ms": 10.656510992992125,
-        "min_ms": 92.058666,
-        "median_ms": 116.0200465,
-        "p95_ms": 138.623022,
-        "max_ms": 138.623022
+        "mean_ms": 117.1841158,
+        "std_ms": 18.213892335443948,
+        "min_ms": 98.357436,
+        "median_ms": 111.7777475,
+        "p95_ms": 164.510242,
+        "max_ms": 164.510242
       },
-      "images_per_second": 34.35080179236988,
-      "speedup_vs_sequential": 1.395059313872963,
-      "alloc_mb_per_run": 29.803678131103517,
+      "images_per_second": 34.13431908149449,
+      "speedup_vs_sequential": 1.350994402007512,
+      "alloc_mb_per_run": 29.803600311279297,
       "allocs_per_run": 802221.25
     },
     {
       "mode": "parallel",
       "timing": {
         "runs": 20,
-        "mean_ms": 111.96767194999998,
-        "std_ms": 9.911483790914735,
-        "min_ms": 96.972753,
-        "median_ms": 115.073912,
-        "p95_ms": 128.047784,
-        "max_ms": 128.047784
+        "mean_ms": 104.78481265,
+        "std_ms": 11.457125251736464,
+        "min_ms": 86.043724,
+        "median_ms": 103.4863555,
+        "p95_ms": 134.602594,
+        "max_ms": 134.602594
       },
-      "images_per_second": 35.72459738009227,
-      "speedup_vs_sequential": 1.4508520823094602,
-      "alloc_mb_per_run": 29.80380859375,
-      "allocs_per_run": 802225.8
+      "images_per_second": 38.173470933814755,
+      "speedup_vs_sequential": 1.5108590686591261,
+      "alloc_mb_per_run": 29.804429626464845,
+      "allocs_per_run": 802226.55
     }
-  ]
+  ],
+  "program_memory": {
+    "sys_mb": 48.34986114501953,
+    "heap_in_use_mb": 19.1796875,
+    "total_alloc_mb": 2057.295310974121,
+    "num_gc": 249
+  }
 }

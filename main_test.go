@@ -139,12 +139,15 @@ func TestRunEndToEnd(t *testing.T) {
 	if err != nil || json.Unmarshal(data, &summary) != nil {
 		t.Fatalf("timing.json unreadable: %v", err)
 	}
+	if summary.Memory.SysMB <= 0 || summary.Memory.TotalAllocMB <= 0 {
+		t.Errorf("program memory not recorded: %+v", summary.Memory)
+	}
 	if len(summary.Modes) != 3 || summary.Modes[0].Timing.Runs != 2 || summary.Modes[0].Speedup != 1 {
 		t.Errorf("unexpected timing summary: %+v", summary.Modes)
 	}
 
 	log, _ := os.ReadFile(filepath.Join(cfg.ResultsDir, "run_log.txt"))
-	for _, want := range []string{"identical output files", "| parallel |", "finished successfully"} {
+	for _, want := range []string{"identical output files", "| parallel |", "Whole-program memory", "finished successfully"} {
 		if !strings.Contains(string(log), want) {
 			t.Errorf("run log missing %q", want)
 		}

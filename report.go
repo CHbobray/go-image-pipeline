@@ -14,15 +14,37 @@ import (
 
 // timingFile is the content of results/timing.json.
 type timingFile struct {
-	Platform   string       `json:"platform"`
-	GoVersion  string       `json:"go"`
-	CPUs       int          `json:"cpus"`
-	Images     int          `json:"images"`
-	LongSide   int          `json:"size"`
-	KeepAspect bool         `json:"keep_aspect"`
-	Workers    int          `json:"workers"`
-	Warmup     int          `json:"warmup_runs"`
-	Modes      []modeReport `json:"modes"`
+	Platform   string        `json:"platform"`
+	GoVersion  string        `json:"go"`
+	CPUs       int           `json:"cpus"`
+	Images     int           `json:"images"`
+	LongSide   int           `json:"size"`
+	KeepAspect bool          `json:"keep_aspect"`
+	Workers    int           `json:"workers"`
+	Warmup     int           `json:"warmup_runs"`
+	Modes      []modeReport  `json:"modes"`
+	Memory     programMemory `json:"program_memory"`
+}
+
+// programMemory is the Go runtime's view of the whole program's memory after
+// the benchmark, in megabytes.
+type programMemory struct {
+	SysMB        float64 `json:"sys_mb"`         // obtained from the operating system
+	HeapInUseMB  float64 `json:"heap_in_use_mb"` // live heap at the end
+	TotalAllocMB float64 `json:"total_alloc_mb"` // allocated over the whole run
+	NumGC        uint32  `json:"num_gc"`
+}
+
+func sampleProgramMemory() programMemory {
+	var stats runtime.MemStats
+	runtime.ReadMemStats(&stats)
+	const mb = 1 << 20
+	return programMemory{
+		SysMB:        float64(stats.Sys) / mb,
+		HeapInUseMB:  float64(stats.HeapInuse) / mb,
+		TotalAllocMB: float64(stats.TotalAlloc) / mb,
+		NumGC:        stats.NumGC,
+	}
 }
 
 // printImageResults lists each image's outcome from the check run.
@@ -82,7 +104,7 @@ func timingTable(reports []modeReport) string {
 }
 
 // writeResults saves the timing JSON and the Markdown tables.
-func writeResults(cfg config, reports []modeReport, stages string) error {
+func writeResults(cfg config, reports []modeReport, memory programMemory, stages string) error {
 	summary := timingFile{
 		Platform:   runtime.GOOS + " " + runtime.GOARCH,
 		GoVersion:  runtime.Version(),
@@ -93,6 +115,7 @@ func writeResults(cfg config, reports []modeReport, stages string) error {
 		Workers:    cfg.Options.Workers,
 		Warmup:     cfg.Warmup,
 		Modes:      reports,
+		Memory:     memory,
 	}
 	data, err := json.MarshalIndent(summary, "", "  ")
 	if err != nil {

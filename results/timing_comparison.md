@@ -2,15 +2,15 @@ Run on linux amd64, 2 CPUs, go1.27.3; 4 images, 20 timed runs per mode after 2 w
 
 | Mode | Mean (ms) | Std (ms) | Median (ms) | p95 (ms) | Images/s | Speedup vs sequential | Allocated per run (MB) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| sequential | 162.4 | 13.5 | 163.8 | 185.7 | 24.6 | 1.00x | 29.8 |
-| pipeline | 116.4 | 10.7 | 116.0 | 138.6 | 34.4 | 1.40x | 29.8 |
-| parallel | 112.0 | 9.9 | 115.1 | 128.0 | 35.7 | 1.45x | 29.8 |
+| sequential | 158.3 | 15.5 | 155.7 | 202.9 | 25.3 | 1.00x | 29.8 |
+| pipeline | 117.2 | 18.2 | 111.8 | 164.5 | 34.1 | 1.35x | 29.8 |
+| parallel | 104.8 | 11.5 | 103.5 | 134.6 | 38.2 | 1.51x | 29.8 |
 
 Time per stage in one sequential pass:
 
 | Stage | Time for all images (ms) | Share |
 |---|---:|---:|
-| Load (decode) | 58.2 | 31% |
-| Resize | 92.5 | 49% |
-| Grayscale | 19.0 | 10% |
-| Save (encode) | 20.3 | 11% |
+| Load (decode) | 77.4 | 33% |
+| Resize | 98.3 | 42% |
+| Grayscale | 31.9 | 14% |
+| Save (encode) | 24.3 | 10% |

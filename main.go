@@ -69,12 +69,7 @@ func exitCode(err error) int {
 // run performs the whole job, one step per helper function. Any error it
 // returns is also recorded at the end of the run log.
 func run(cfg config) (runErr error) {
-	for _, dir := range []string{cfg.OutputDir, cfg.ResultsDir} {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("creating folder: %w", err)
-		}
-	}
-	closeLog, err := openRunLog(filepath.Join(cfg.ResultsDir, "run_log.txt"))
+	closeLog, err := prepareOutputs(cfg)
 	if err != nil {
 		return err
 	}
@@ -89,33 +84,13 @@ func run(cfg config) (runErr error) {
 	}
 
 	printSetup(cfg)
-	check, err := checkModes(cfg)
+	check, stages, err := checkAndReport(cfg)
 	if err != nil {
 		return err
 	}
-	printImageResults(check.Results)
-	fmt.Fprintf(out, "All %d modes wrote identical output files.\n", len(cfg.Modes))
-
-	stages := ""
-	if cfg.Modes[0] == pipeline.Sequential {
-		stages = stageTable(check.Results)
-		fmt.Fprintf(out, "\nTime per stage in one sequential pass:\n\n%s", stages)
-	}
-
-	fmt.Fprintf(out, "\nBenchmarking: %d warm-up + %d timed rounds; each round runs every mode once, in shuffled order.\n",
-		cfg.Warmup, cfg.Runs)
-	reports, err := benchmark(cfg)
-	if err != nil {
-		return fmt.Errorf("benchmark: %w", err)
-	}
-	fmt.Fprintf(out, "\nTime to process all %d images (%s, %d CPUs):\n\n%s", len(cfg.Tasks),
-		runtime.GOOS+" "+runtime.GOARCH, runtime.NumCPU(), timingTable(reports))
-
-	if err := writeResults(cfg, reports, stages); err != nil {
+	if err := benchmarkAndReport(cfg, stages); err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "\nProcessed images are in %s; timing and run log are in %s\n", cfg.OutputDir, cfg.ResultsDir)
-
 	if cfg.MemProfile != "" {
 		if err := writeHeapProfile(cfg.MemProfile); err != nil {
 			return err
@@ -124,6 +99,56 @@ func run(cfg config) (runErr error) {
 	if check.Failures > 0 {
 		return errImagesFailed
 	}
+	return nil
+}
+
+// prepareOutputs creates the output and results folders and opens the run log.
+func prepareOutputs(cfg config) (closeLog func(runErr error), err error) {
+	for _, dir := range []string{cfg.OutputDir, cfg.ResultsDir} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, fmt.Errorf("creating folder: %w", err)
+		}
+	}
+	return openRunLog(filepath.Join(cfg.ResultsDir, "run_log.txt"))
+}
+
+// checkAndReport runs every mode once, prints each image's result, and, when
+// sequential mode is first, the per-stage times, which it also returns.
+func checkAndReport(cfg config) (checkResult, string, error) {
+	check, err := checkModes(cfg)
+	if err != nil {
+		return check, "", err
+	}
+	printImageResults(check.Results)
+	fmt.Fprintf(out, "All %d modes wrote identical output files.\n", len(cfg.Modes))
+
+	if cfg.Modes[0] != pipeline.Sequential {
+		return check, "", nil
+	}
+	stages := stageTable(check.Results)
+	fmt.Fprintf(out, "\nTime per stage in one sequential pass:\n\n%s", stages)
+	return check, stages, nil
+}
+
+// benchmarkAndReport times the modes, measures the program's memory, and
+// prints and saves the results.
+func benchmarkAndReport(cfg config, stages string) error {
+	fmt.Fprintf(out, "\nBenchmarking: %d warm-up + %d timed rounds; each round runs every mode once, in shuffled order.\n",
+		cfg.Warmup, cfg.Runs)
+	reports, err := benchmark(cfg)
+	if err != nil {
+		return fmt.Errorf("benchmark: %w", err)
+	}
+	memory := sampleProgramMemory()
+	fmt.Fprintf(out, "\nTime to process all %d images (%s, %d CPUs):\n\n%s", len(cfg.Tasks),
+		runtime.GOOS+" "+runtime.GOARCH, runtime.NumCPU(), timingTable(reports))
+	fmt.Fprintf(out, "\nWhole-program memory: %.1f MB obtained from the OS, %.1f MB heap in use, %.0f MB allocated in total, %d garbage collections\n",
+		memory.SysMB, memory.HeapInUseMB, memory.TotalAllocMB, memory.NumGC)
+
+	if err := writeResults(cfg, reports, memory, stages); err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "\nProcessed images are in %s; timing and run log are in %s\n", cfg.OutputDir, cfg.ResultsDir)
 	return nil
 }
 
