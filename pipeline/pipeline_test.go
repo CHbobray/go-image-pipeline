@@ -180,8 +180,11 @@ func TestParseMode(t *testing.T) {
 	}
 }
 
+// TestStageTimesAreRecorded uses a full-size 1200-pixel image so every stage
+// takes milliseconds. Go's clock on Windows advances in steps of up to about a
+// millisecond, so a stage on a tiny image can measure as exactly zero there.
 func TestStageTimesAreRecorded(t *testing.T) {
-	results, err := Run(Sequential, syntheticTasks(t, 1, 300), testOptions)
+	results, err := Run(Sequential, syntheticTasks(t, 1, 1200), Options{LongSide: 1200, KeepAspect: true})
 	if err != nil {
 		t.Fatal(err)
 	}

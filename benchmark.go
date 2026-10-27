@@ -169,7 +169,9 @@ func buildReports(cfg config, samples map[pipeline.Mode][]time.Duration,
 }
 
 // addSpeedups fills in each mode's speedup relative to sequential, when the
-// sequential mode was measured.
+// sequential mode was measured. A mode whose time measured as zero (possible
+// for tiny batches with a coarse clock) gets no speedup rather than a
+// division by zero, which JSON could not store.
 func addSpeedups(reports []modeReport) {
 	index := slices.IndexFunc(reports, func(r modeReport) bool { return r.Mode == pipeline.Sequential })
 	if index < 0 {
@@ -177,6 +179,8 @@ func addSpeedups(reports []modeReport) {
 	}
 	baseline := reports[index].Timing.MeanMs
 	for i := range reports {
-		reports[i].Speedup = baseline / reports[i].Timing.MeanMs
+		if reports[i].Timing.MeanMs > 0 {
+			reports[i].Speedup = baseline / reports[i].Timing.MeanMs
+		}
 	}
 }

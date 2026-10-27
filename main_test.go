@@ -15,6 +15,7 @@ import (
 
 	"github.com/CHbobray/go-image-pipeline/imageprocessing"
 	"github.com/CHbobray/go-image-pipeline/pipeline"
+	"github.com/CHbobray/go-image-pipeline/timing"
 )
 
 // fakeProject creates a project folder whose images/ holds count small
@@ -167,5 +168,19 @@ func TestRunReportsFailedImages(t *testing.T) {
 	log, _ := os.ReadFile(filepath.Join(cfg.ResultsDir, "run_log.txt"))
 	if !strings.Contains(string(log), "FAILED  broken.jpg") || !strings.Contains(string(log), "run failed") {
 		t.Errorf("run log should name the failed image and the outcome:\n%s", log)
+	}
+}
+
+func TestSpeedupsSkipZeroTimes(t *testing.T) {
+	reports := []modeReport{
+		{Mode: pipeline.Sequential, Timing: timing.Stats{MeanMs: 100}},
+		{Mode: pipeline.Parallel, Timing: timing.Stats{MeanMs: 0}},
+	}
+	addSpeedups(reports)
+	if reports[0].Speedup != 1 || reports[1].Speedup != 0 {
+		t.Errorf("speedups %v and %v, want 1 and 0", reports[0].Speedup, reports[1].Speedup)
+	}
+	if _, err := json.Marshal(reports); err != nil {
+		t.Errorf("reports must stay JSON-encodable: %v", err)
 	}
 }
