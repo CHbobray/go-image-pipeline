@@ -220,7 +220,7 @@ go test -run XXX -bench . -benchmem ./...
 | `BenchmarkRepoImages/{sequential,pipeline,parallel}` | the four images in `images\`, in each mode |
 | `BenchmarkSyntheticBatch/{sequential,pipeline,parallel}` | 24 generated 1200-pixel images, in each mode |
 
-Each reports time per batch, bytes and allocations per batch, and images per second. Output from the Windows laptop is in results/go_benchmarks.txt.`
+Each reports time per batch, bytes and allocations per batch, and images per second. Output from the Windows laptop is in `results/go_benchmarks.txt`.
 
 **Profiles:**
 
@@ -278,7 +278,6 @@ The CPU profile agrees: most time is in `nfnt/resize`'s resampling and in the st
 - **The limit is the hardware, not the code.** Concurrency can only use cores that exist. On 2 cores the ideal speedup is 2x, and Go reached about 1.5x after coordination costs and the parts that cannot overlap. That matches what management would see on a small server; larger servers should see more.
 - **A finding for future optimization.** The memory benchmarks show `Grayscale` making one allocation per pixel (750,002 for a 1000 × 750 image), because the original code reads every pixel through the generic `img.At` interface. Reading the pixel buffer directly would remove that cost. It was left unchanged so that all three modes run the original algorithm and the comparison isolates the effect of concurrency.
 
----
 ### Rerun on a Windows laptop
 
 The same comparison was rerun on my laptop, which has many more cores than the 2-core development machine:
@@ -308,6 +307,7 @@ Time per stage in one sequential pass: load 49.0 ms (40%), resize 36.8 ms (30%),
 
 `results/` now holds this Windows run (`timing_comparison.md`, `timing.json`, `run_log.txt`, `go_benchmarks.txt`). `cpu_profile_summary.txt` is still from the Linux machine, and the Linux files behind the tables above remain in the Git history.
 
+---
 ## Preserving the aspect ratio (optional item)
 
 The original `Resize` forced every image to 500 × 500, which distorts any picture that is not square. Now `imageprocessing.ScaledSize` reads each image's width and height and scales the **longer side** to `-size` (500 by default), scaling the shorter side by the same factor:
